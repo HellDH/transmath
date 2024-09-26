@@ -1,10 +1,15 @@
 from typing import List
 from sympy import Derivative, Expr
 
-class combinedMethod:
-    def solve(self, expr: Expr, cords: List[float], eps: float, x0: float = None) -> float:
+class NumericalMethods:
+    def combinedMethod(self, expr: Expr, cords: List[float], eps: float, x0: float = None) -> float | bool:
         fn1 = expr.subs('x', cords[0])
         fn2 = expr.subs('x', cords[1])
+
+        if fn1 * fn2 < 0:
+            pass
+        else:
+            return False 
 
         der = None
 
@@ -32,9 +37,9 @@ class combinedMethod:
 
         x12 = x0 - (((cords[1] - x0) * fn1) / (abs(fn2) + abs(fn1)))
     
-        detta = (x11 + x12) / 2
+        etta = (x11 + x12) / 2
 
-        ans = abs(detta.evalf() - x11)
+        ans = abs(etta.evalf() - x11)
     
         if not ans < eps:
             rec = self.solve(expr, [x11.evalf(), x12.evalf()], eps, x11.evalf())
