@@ -2,7 +2,7 @@ from typing import List
 from sympy import Derivative, Expr
 
 class NumericalMethods:
-    def combinedMethod(self, expr: Expr, cords: List[float], eps: float, x0: float = None) -> float | bool:
+    def combinedMethod(self, expr: Expr, eps: float, cords: List[float], x0: float = None) -> float | bool:
         fn1 = expr.subs('x', cords[0])
         fn2 = expr.subs('x', cords[1])
 
@@ -18,10 +18,11 @@ class NumericalMethods:
 
         try_expr = Derivative(der).doit()
 
-        if len(try_expr.args) == 0:
-            pass
-        else:
-            der = try_expr
+        match len(try_expr.args):
+            case 0:
+                pass
+            case _:
+                der = try_expr
 
         if x0 != None:
             pass
@@ -31,11 +32,9 @@ class NumericalMethods:
             if fn2 * der.subs('x', cords[1]) > 0:
                 x0 = cords[1]
     
-        x11 = x0 - (fn1 / ((Derivative(expr.as_ordered_terms()[0]).doit()) \
-                           .subs('x', x0) \
-                              + expr.as_ordered_terms()[1].subs("x", 1)))
+        x11 = x0 - (expr.subs('x', x0) / ((Derivative(expr.subs('x', x0)).doit()).subs('x', x0)))
 
-        x12 = x0 - (((cords[1] - x0) * fn1) / (abs(fn2) + abs(fn1)))
+        x12 = cords[0] - (((cords[1] - cords[0]) * fn1) / (fn2 - fn1))
     
         etta = (x11 + x12) / 2
 
@@ -46,3 +45,14 @@ class NumericalMethods:
             return rec
 
         return ans
+    
+    def chordMethod(self, expr: Expr, eps: float, cords: List[float]) -> float | bool:
+        fn1 = expr.subs('x', cords[0])
+        fn2 = expr.subs('x', cords[1])
+
+        if fn1 * fn2 < 0:
+            pass
+        else:
+            return False 
+        
+        
