@@ -5,6 +5,6 @@ from sympy import symbols
 o = NumericalMethods()
 
 x = symbols('x')
-expr = x ** 3 + 3 * x ** 2 - 24 * x + 1
+expr = x ** 3 - 0.2 * x ** 2 + 0.5 * x + 1.5
 
-print(o.combinedMethod(expr, 0.001))
+print(o.chordMethod(expr, 0.0001, [-1, 0]))

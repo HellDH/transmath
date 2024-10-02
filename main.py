@@ -2,7 +2,7 @@ from typing import List
 from sympy import Derivative, Expr, Poly
 
 class NumericalMethods:
-    def combinedMethod(self, expr: Expr, eps: float, cords: List[float] = None, x0: float = None) -> float | bool:
+    def combinedMethod(self, expr: Expr, eps: float, cords: List[float], x0: float = None) -> float | bool:
         fn1 = expr.subs('x', cords[0])
         fn2 = expr.subs('x', cords[1])
 
@@ -13,7 +13,7 @@ class NumericalMethods:
 
         der = None
 
-        for i in range(len(expr.args)) :
+        for i in range(len(expr.args)):
             der = Derivative(expr).doit()
 
         try_expr = Derivative(der).doit()
@@ -45,9 +45,31 @@ class NumericalMethods:
             rec = self.combinedMethod(expr, eps, [x11.evalf(), x12.evalf()], x11.evalf())
             return rec
 
-        return etta
+        return round(etta, 3)
     
     def chordMethod(self, expr: Expr, eps: float, cords: List[float]) -> float | bool:
-        pass
+        der = expr
+
+        while len(der.args) > 2:
+            der = Derivative(der).doit()
+
+        if der.subs('x', cords[0]) < 0 and der.subs('x', cords[1]) < 0:
+            pass
+        else:
+            return False
         
+        index = 0
+
+        ans = None
+
+        xN = expr.subs('x', index).evalf()
+
+        xNx = cords[0] - (expr.subs('x', cords[0]) / (expr.subs('x', xN) \
+                            - expr.subs('x', cords[0]))) * (xN - cords[0])
         
+        if xNx < eps:
+            index += 1 # TODO : Доделать
+        else:
+            ans = xN
+
+        return xN
