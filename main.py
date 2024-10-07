@@ -1,75 +1,115 @@
-from typing import List
-from sympy import Derivative, Expr, Poly
+from typing import Tuple
+from sympy import Derivative, Expr
 
 class NumericalMethods:
-    def combinedMethod(self, expr: Expr, eps: float, cords: List[float], x0: float = None) -> float | bool:
-        fn1 = expr.subs('x', cords[0])
-        fn2 = expr.subs('x', cords[1])
+    def combinedMethod(self, expr: Expr, eps: float, coincidences: Tuple[float]) -> float | bool:
+        def lower(cords: Tuple[float], x0: float = None):
+            fn1 = expr.subs('x', cords[0])
+            fn2 = expr.subs('x', cords[1])
 
-        if fn1 * fn2 < 0:
-            pass
-        else:
-            return False
-
-        der = None
-
-        for i in range(len(expr.args)):
-            der = Derivative(expr).doit()
-
-        try_expr = Derivative(der).doit()
-
-        match len(try_expr.args):
-            case 0:
+            if fn1 * fn2 < 0:
                 pass
-            case _:
-                der = try_expr
+            else:
+                return False
 
-        if x0 != None:
-            pass
-        else:
-            if fn1 * der.subs('x', cords[0]) > 0:
-                x0 = cords[0] 
-            if fn2 * der.subs('x', cords[1]) > 0:
-                x0 = cords[1]
-    
-        x11 = x0 - (fn1 / ((Derivative(expr.as_ordered_terms()[0]).doit()).subs('x', x0) \
-                            + expr.as_ordered_terms()[1].subs("x", 1)))
+            der = None
 
-        x12 = cords[0] - (((cords[1] - cords[0]) * fn1) / (fn2 - fn1))
+            for i in range(len(expr.args)):
+                der = Derivative(expr).doit()
 
-        etta = (x11 + x12) / 2
+            try_expr = Derivative(der).doit()
 
-        error = abs(etta.evalf() - x11.evalf())
-    
-        if not error < eps:
-            rec = self.combinedMethod(expr, eps, [x11.evalf(), x12.evalf()], x11.evalf())
-            return rec
+            match len(try_expr.args):
+                case 0:
+                    pass
+                case _:
+                    der = try_expr
 
-        return round(etta, 3)
-    
-    def chordMethod(self, expr: Expr, eps: float, cords: List[float]) -> float | bool:
-        der = expr
-
-        while len(der.args) > 2:
-            der = Derivative(der).doit()
-
-        if der.subs('x', cords[0]) < 0 and der.subs('x', cords[1]) < 0:
-            pass
-        else:
-            return False
+            if x0 != None:
+                pass
+            else:
+                if fn1 * der.subs('x', cords[0]) > 0:
+                    x0 = cords[0] 
+                if fn2 * der.subs('x', cords[1]) > 0:
+                    x0 = cords[1]
         
-        index = 0
+            x11 = x0 - (fn1 / ((Derivative(expr.as_ordered_terms()[0]).doit()).subs('x', x0) \
+                                + expr.as_ordered_terms()[1].subs("x", 1)))
 
-        ans = None
+            x12 = cords[0] - (((cords[1] - cords[0]) * fn1) / (fn2 - fn1))
 
-        xN = expr.subs('x', index).evalf()
+            etta = (x11 + x12) / 2
 
-        xNx = cords[0] - (expr.subs('x', cords[0]) / (expr.subs('x', xN) \
-                            - expr.subs('x', cords[0]))) * (xN - cords[0])
+            error = abs(etta.evalf() - x11.evalf())
         
-        if xNx < eps:
-            index += 1 # TODO : Доделать
-        else:
-            ans = xN
+            if not error < eps:
+                recursion = lower((x11.evalf(), x12.evalf()), x11.evalf())
+                return recursion
 
-        return xN
+            return etta
+        
+        lower_fun = lower(coincidences)
+
+        return lower_fun
+    
+    def newtonMethod(self, expr: Expr, eps: float, cords: Tuple[float]) -> float | bool:
+        fx = expr.subs
+        fxx = Derivative(expr).doit().doit().evalf().subs
+
+        def lower(x0: float = None):
+            if x0 == None:
+                for i in range(2):
+                    if fx('x', cords[i]) * fxx('x', cords[i]) > 0:
+                        x0 = cords[i]
+                    else:
+                        continue
+
+            if x0 == None:
+                return False
+            
+            error = fx('x', x0) / Derivative(expr).doit().evalf().subs('x', x0)
+
+            xn = x0 - error
+
+            if error > eps:
+                recursion = lower(xn)
+                return recursion
+
+            return xn
+        
+        lower_fun = lower()
+
+        return lower_fun
+    
+    def chordMethod(self, expr: Expr, eps: float, cords: Tuple[float]) -> float | bool:
+        fx = expr.subs
+        fxx = Derivative(expr).doit().doit().evalf().subs
+
+        motionless = list(cords)
+
+        def lower(x0: float = None):
+            if x0 == None:
+                for i in range(2):
+                    if fx('x', cords[i]) * fxx('x', cords[i]) > 0:
+                        x0 = cords[i]
+                        motionless.remove(cords[i])
+                        break
+                    else:
+                        continue
+
+            if x0 == None:
+                return False
+
+            xn = motionless[0] - (fx('x', motionless[0]) / (fx('x', x0) - fx('x', motionless[0]))) * (x0 - motionless[0])
+
+            if abs(xn - x0) > eps:
+                recursion = lower(xn)
+                return recursion
+            
+            return xn
+        
+        lower_fun = lower()
+
+        print(lower_fun) # TODO : Доделать
+
+        return lower_fun
