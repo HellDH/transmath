@@ -1,5 +1,5 @@
-from typing import Tuple
-from sympy import Derivative, Expr
+from typing import Tuple, List
+from sympy import Derivative, Expr, Eq
 
 class NumericalMethods:
     def combinedMethod(self, expr: Expr, eps: float, coincidences: Tuple[float]) -> float | bool:
@@ -81,8 +81,17 @@ class NumericalMethods:
 
         return lower_fun
     
-    def chordMethod(self, expr: Expr, eps: float, cords: Tuple[float]) -> float | bool:
+    def chordMethod(self, expr: Expr, eps: float, cords: List[float]) -> float | bool:
         pass
 
-    def ZeidelMethod(self, expr: Tuple[Expr] | Expr, eps: float):
-        pass
+    def ZeidelMethod(self, expr: Tuple[str] | Expr, eps: float) -> Tuple[float | bool] | bool:
+        def diagonal_vars():
+            if type(expr) == tuple:
+                diagonals = []
+                for i in expr:
+                    diagonals.append(i.args)
+                return diagonals
+            else:
+                return False
+            
+        return diagonal_vars()

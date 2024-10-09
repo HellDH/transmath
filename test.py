@@ -1,10 +1,12 @@
-from typing import Dict
+from typing import Dict, Tuple
 
 from main import NumericalMethods
 
-from sympy import symbols, Expr, tan
+from sympy import symbols, init_printing, Expr, tan, Matrix
 
 import pytest
+
+init_printing(use_unicode=True)
 
 o = NumericalMethods()
 x = symbols('x')
@@ -18,7 +20,7 @@ x = symbols('x')
                                 "expected": -6.639
                             }
                          ])
-def test_combined_method(data: Dict[str, Expr | float | tuple]):
+def test_combined_method(data: Dict[str, Expr | float | Tuple[float]]):
     obj = o.combinedMethod(data["expr"], data["epsilon"], data["cords"])
     
     assert round(float(obj), 3) == data["expected"]
@@ -32,7 +34,24 @@ def test_combined_method(data: Dict[str, Expr | float | tuple]):
                                 "expected": -0.339
                             }
                          ])
-def test_newton_method(data: Dict[str, Expr | float | tuple]):
+def test_newton_method(data: Dict[str, Expr | float | Tuple[float]]):
     obj = o.newtonMethod(data["expr"], data["epsilon"], data["cords"])
+
+    assert round(float(obj), 3) == data["expected"]
+
+@pytest.mark.parametrize("data",
+                         [
+                            {
+                                "expr": (
+                                    (10 * x + x + 2 * x, 1),
+                                    (3 * x + 5 * x, -2),
+                                    (x - x + 9 * x, -1)
+                                ),
+                                "epsilon": 0.1,
+                                "expected": 1. # Matrix([0.179], [-0.497], [-0.18])
+                            }
+                         ])
+def test_zeidel_method(data: Dict[str, Tuple[Tuple[Expr | float]] | float | None | Matrix]):
+    obj = o.ZeidelMethod(data["expr"], data["epsilon"])
 
     assert round(float(obj), 3) == data["expected"]
