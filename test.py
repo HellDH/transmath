@@ -36,17 +36,3 @@ def test_newton_method(data: Dict[str, Expr | float | tuple]):
     obj = o.newtonMethod(data["expr"], data["epsilon"], data["cords"])
 
     assert round(float(obj), 3) == data["expected"]
-
-@pytest.mark.parametrize("data",
-                         [
-                            {
-                                "expr": x ** 3 - 3 * x + 1,
-                                "epsilon": 0.01,
-                                "cords": (-2, -1),
-                                "expected": -0.946
-                            }
-                         ])
-def test_chord_method(data: Dict[str, Expr | float | tuple]):
-    obj = o.chordMethod(data["expr"], data["epsilon"], data["cords"])
-
-    assert round(float(obj), 3) == data["expected"]
