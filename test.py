@@ -2,7 +2,7 @@ from typing import Dict
 
 from main import NumericalMethods
 
-from sympy import symbols, Expr
+from sympy import symbols, Expr, tan
 
 import pytest
 
@@ -26,10 +26,10 @@ def test_combined_method(data: Dict[str, Expr | float | tuple]):
 @pytest.mark.parametrize("data",
                          [
                             {
-                                "expr": x ** 3 + 4 * x - 3,
-                                "epsilon": 0.001,
-                                "cords": (0, 1),
-                                "expected": 0.674
+                                "expr": tan(0.93 * x + 0.43) - x ** 2 ,
+                                "epsilon": 0.0001,
+                                "cords": (-0.4, -0.2),
+                                "expected": -0.339
                             }
                          ])
 def test_newton_method(data: Dict[str, Expr | float | tuple]):

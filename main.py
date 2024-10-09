@@ -82,34 +82,6 @@ class NumericalMethods:
         return lower_fun
     
     def chordMethod(self, expr: Expr, eps: float, cords: Tuple[float]) -> float | bool:
-        fx = expr.subs
-        fxx = Derivative(expr).doit().doit().evalf().subs
+        pass
 
-        motionless = list(cords)
-
-        def lower(x0: float = None):
-            if x0 == None:
-                for i in range(2):
-                    if fx('x', cords[i]) * fxx('x', cords[i]) > 0:
-                        x0 = cords[i]
-                        motionless.remove(cords[i])
-                        break
-                    else:
-                        continue
-
-            if x0 == None:
-                return False
-
-            xn = motionless[0] - (fx('x', motionless[0]) / (fx('x', x0) - fx('x', motionless[0]))) * (x0 - motionless[0])
-
-            if abs(xn - x0) > eps:
-                recursion = lower(xn)
-                return recursion
-            
-            return xn
-        
-        lower_fun = lower()
-
-        print(lower_fun) # TODO : Доделать
-
-        return lower_fun
+    
