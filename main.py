@@ -84,4 +84,5 @@ class NumericalMethods:
     def chordMethod(self, expr: Expr, eps: float, cords: Tuple[float]) -> float | bool:
         pass
 
-    
+    def ZeidelMethod(self, expr: Tuple[Expr] | Expr, eps: float):
+        pass
