@@ -53,6 +53,9 @@ class NumericalMethods:
         
         return lower(coincidences)
     
+    def chordMethod(self, expr: Expr, eps: float, cords: List[float]) -> float | bool:
+        pass # TODO : Сделать метод хорд, слишком долго откладывается
+
     def newtonMethod(self, eq: str, eps: float, cords: Tuple[float]) -> float | bool:
         expr: Expr = parse_expr(eq, evaluate=False)
 
@@ -142,5 +145,5 @@ class NumericalMethods:
 
         return [round(result, 3) for result in hash_table[iterations_count].values()]
 
-    def chordMethod(self, expr: Expr, eps: float, cords: List[float]) -> float | bool:
-        pass # TODO : Сделать метод хорд, слишком долго откладывается
+    def half_divisonMethod(self):
+        pass # TODO : Сделать, наименьший приоритет пока что
