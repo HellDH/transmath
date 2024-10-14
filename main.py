@@ -1,8 +1,11 @@
 from typing import Tuple, List
-from sympy import Derivative, Expr, Eq
+from inspect import signature
+from sympy import Derivative, Expr, parse_expr, Matrix
 
 class NumericalMethods:
-    def combinedMethod(self, expr: Expr, eps: float, coincidences: Tuple[float]) -> float | bool:
+    def combinedMethod(self, eq: str, eps: float, coincidences: Tuple[float]) -> float | bool:
+        expr: Expr = parse_expr(eq, evaluate=False)
+
         def lower(cords: Tuple[float], x0: float = None):
             fn1 = expr.subs('x', cords[0])
             fn2 = expr.subs('x', cords[1])
@@ -42,17 +45,17 @@ class NumericalMethods:
 
             error = abs(etta.evalf() - x11.evalf())
         
-            if not error < eps:
+            if error > eps:
                 recursion = lower((x11.evalf(), x12.evalf()), x11.evalf())
                 return recursion
 
             return etta
         
-        lower_fun = lower(coincidences)
-
-        return lower_fun
+        return lower(coincidences)
     
-    def newtonMethod(self, expr: Expr, eps: float, cords: Tuple[float]) -> float | bool:
+    def newtonMethod(self, eq: str, eps: float, cords: Tuple[float]) -> float | bool:
+        expr: Expr = parse_expr(eq, evaluate=False)
+
         fx = expr.subs
         fxx = Derivative(expr).doit().doit().evalf().subs
 
@@ -77,21 +80,67 @@ class NumericalMethods:
 
             return xn
         
-        lower_fun = lower()
+        return lower()
 
-        return lower_fun
-    
-    def chordMethod(self, expr: Expr, eps: float, cords: List[float]) -> float | bool:
-        pass
+    def zeidelMethod(self, expr: Tuple[str | float], iterations_count: int = 1) -> Matrix | bool:
+        equation_system = []
+        for ni, i in enumerate(expr):
+            equation: Expr = parse_expr(i[0], evaluate=False)
 
-    def ZeidelMethod(self, expr: Tuple[str] | Expr, eps: float) -> Tuple[float | bool] | bool:
-        def diagonal_vars():
-            if type(expr) == tuple:
-                diagonals = []
-                for i in expr:
-                    diagonals.append(i.args)
-                return diagonals
+            equation_system.append({
+                "equation": list(equation.args),
+                "diagonal_var": equation.args[ni],
+                "eq_indexes": [i for i in range(1, len(equation.args) + 1)]
+            })
+
+        for num, j in enumerate(equation_system):
+            var = j["diagonal_var"]
+            j["equation"].remove(var)
+
+            try:
+                del j["eq_indexes"][num]
+            except Exception as e:
+                print(e)
+                pass
+
+            if abs(var.subs('x', 1)) >= abs(sum(j["equation"]).subs('x', 1)):
+                continue
             else:
                 return False
+
+        hash_table = {}
+        hash_table["iter_forms"] = {}
+
+        for k in range(len(equation_system)):
+            ldict = locals()
+
+            arg_list = [str(arg.free_symbols.pop()) + str(equation_system[k]["eq_indexes"][num]) for num, arg in enumerate(equation_system[k]['equation'])]
+            var_list = [str(eq * -1) + str(equation_system[k]["eq_indexes"][num]) for num, eq in enumerate(equation_system[k]['equation'])]
+
+            s = f"xn = lambda {', '.join(arg_list)}: ({expr[k][1]} + {' + '.join(var_list)}) / {equation_system[k]['diagonal_var'].subs('x', 1)}"
+
+            exec(s,
+                 globals(),
+                 ldict)
             
-        return diagonal_vars()
+            hash_table["iter_forms"][k + 1] = ldict["xn"]
+
+        for step in range(iterations_count + 1):
+            hash_table[step] = {}
+            for n in range(1, iterations_count + 1):
+                hash_table[step]["x" + str(n)] = 0
+
+        for iter in range(1, iterations_count + 1):
+            increment = 1
+            for f in hash_table['iter_forms'].values():
+                sig = signature(f)
+                
+                params_list = [hash_table[iter - 1][str(el)] for el in sig.parameters.values()]
+
+                hash_table[iter][f'x{increment}'] = f(*params_list)
+                increment += 1
+
+        return [round(result, 3) for result in hash_table[iterations_count].values()]
+
+    def chordMethod(self, expr: Expr, eps: float, cords: List[float]) -> float | bool:
+        pass # TODO : Сделать метод хорд, слишком долго откладывается
