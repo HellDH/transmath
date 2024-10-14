@@ -82,7 +82,7 @@ class NumericalMethods:
         
         return lower()
 
-    def zeidelMethod(self, expr: Tuple[str | float], iterations_count: int = 1) -> Matrix | bool:
+    def zeidelMethod(self, expr: Tuple[str | float], iterations_count: int = 1) -> List[float] | bool:
         equation_system = []
         for ni, i in enumerate(expr):
             equation: Expr = parse_expr(i[0], evaluate=False)
